@@ -10,7 +10,7 @@ const routes = [
   {
     path: "/",
     name: "root",
-    redirect: "/restaurants"
+    redirect: "/restaurants",
   },
   {
     path: "/signin",
@@ -25,22 +25,22 @@ const routes = [
   {
     path: "/restaurants",
     name: "restaurants",
-    component: Restaurants
+    component: Restaurants,
   },
   {
     path: "/restaurants/feeds",
     name: "restaurants-feeds",
-    component: () => import("../views/RestaurantsFeeds.vue")
+    component: () => import("../views/RestaurantsFeeds.vue"),
   },
   {
     path: "/restaurants/top",
     name: "restaurants-tops",
-    component: () => import("../views/RestaurantsTop.vue")
+    component: () => import("../views/RestaurantsTop.vue"),
   },
   {
     path: "/users/top",
     name: "users-top",
-    component: () => import("../views/UsersTop.vue")
+    component: () => import("../views/UsersTop.vue"),
   },
   {
     path: "*",
@@ -50,6 +50,7 @@ const routes = [
 ];
 
 const router = new VueRouter({
+  linkExactActiveClass: "active",
   routes,
 });
 
