@@ -5,6 +5,7 @@
     <RestaurantDetail :initial-restaurant="restaurant" />
     <hr />
     <!-- 餐廳評論 RestaurantComments -->
+    <RestaurantComments :restaurant-comments="restaurantComments" />
     <!-- 新增評論 CreateComment -->
   </div>
 </template>
@@ -97,11 +98,13 @@ const dummyRestData = {
 };
 
 import RestaurantDetail from "../components/RestaurantDetail";
+import RestaurantComments from "../components/RestaurantComments";
 
 export default {
   name: "Restaurant",
   components: {
     RestaurantDetail,
+    RestaurantComments,
   },
   data() {
     return {
