@@ -10,7 +10,7 @@
         :to="{ name: 'user', params: { id: following.id } }"
       >
         <img
-          :src="following.image"
+          :src="following.image | emptyImage"
           width="60"
           height="60"
           class="avatar mr-1 mb-1"
@@ -21,8 +21,10 @@
 </template>
 
 <script>
+import { emptyImageFilter } from "./../utils/mixins";
 export default {
   name: "UserFollowingsCard",
+  mixins: [emptyImageFilter],
   props: {
     followings: {
       type: Array,
