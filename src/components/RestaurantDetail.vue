@@ -75,10 +75,10 @@
 </template>
 
 <script>
-import { emptyInageFilter } from "./../utils/mixins";
+import { emptyImageFilter } from "./../utils/mixins";
 export default {
   name: "RestaurantDetail",
-  mixins: [emptyInageFilter],
+  mixins: [emptyImageFilter],
   props: {
     initialRestaurant: {
       type: Object,

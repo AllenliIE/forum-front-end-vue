@@ -4,6 +4,7 @@
     <!-- 餐廳資訊頁 RestaurantDetail -->
     <RestaurantDetail :initial-restaurant="restaurant" />
     <hr />
+    <h2 class="my-4">所有評論：</h2>
     <!-- 餐廳評論 RestaurantComments -->
     <RestaurantComments
       :restaurant-comments="restaurantComments"
