@@ -119,6 +119,10 @@ export default {
   },
   created() {
     this.fetchCategories();
+    this.restaurant = {
+      ...this.restaurant,
+      ...this.initialRestaurant,
+    };
   },
   methods: {
     fetchCategories() {
