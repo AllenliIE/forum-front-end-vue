@@ -40,9 +40,7 @@
 
       <div class="text-center mb-3">
         <p>
-          <router-link to="/signup">
-            Sign Up
-          </router-link>
+          <router-link to="/signup"> Sign Up </router-link>
         </p>
       </div>
 
@@ -52,7 +50,9 @@
 </template>
 
 <script>
+import authorizationAPI from "./../apis/authorization";
 export default {
+  name: "Signin",
   data() {
     return {
       email: "",
@@ -61,12 +61,16 @@ export default {
   },
   methods: {
     handleSubmit() {
-      const data = JSON.stringify({
-        email: this.email,
-        password: this.password,
-      });
-
-      console.log("data", data);
+      authorizationAPI
+        .signIn({
+          email: this.email,
+          password: this.password,
+        })
+        .then((response) => {
+          const { data } = response;
+          localStorage.setItem("token", data.token);
+          this.$router.push("/restaurants");
+        });
     },
   },
 };
