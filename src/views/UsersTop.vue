@@ -18,7 +18,7 @@
             v-if="user.isFollowed"
             type="button"
             class="btn btn-danger"
-            @click.stop.prevent="unfollow(user.id)"
+            @click.stop.prevent="deleteFollowing(user.id)"
           >
             取消追蹤
           </button>
@@ -26,7 +26,7 @@
             v-else
             type="button"
             class="btn btn-primary"
-            @click.stop.prevent="follow(user.id)"
+            @click.stop.prevent="addFollowing(user.id)"
           >
             追蹤
           </button>
@@ -39,6 +39,10 @@
 <script>
 import NavTabs from "./../components/NavTabs";
 import { emptyImageFilter } from "./../utils/mixins";
+
+import usersAPI from "./../apis/users";
+import { Toast } from "./../utils/helpers";
+
 export default {
   name: "UsersTop",
   mixins: [emptyImageFilter],
@@ -51,90 +55,82 @@ export default {
     };
   },
   created() {
-    this.fetchUsersTop();
+    this.fetchTopUsers();
   },
   methods: {
-    fetchUsersTop() {
-      this.users = dummyUserTop.users.map((user) => {
-        return {
+    async fetchTopUsers() {
+      try {
+        const { data } = await usersAPI.getTopUsers();
+
+        this.users = data.users.map((user) => ({
           id: user.id,
           name: user.name,
           image: user.image,
           followerCount: user.FollowerCount,
           isFollowed: user.isFollowed,
-        };
-      });
+        }));
+      } catch (error) {
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "無法取得美食達人，請稍後再試",
+        });
+      }
     },
-    follow(userId) {
-      this.users = this.users.map((user) => {
-        if (userId !== user.id) {
-          return user;
-        } else {
-          return {
-            ...user,
-            followerCount: user.followerCount + 1,
-            isFollowed: true,
-          };
+    async addFollowing(userId) {
+      try {
+        const { data } = await usersAPI.addFollowing({ userId });
+
+        console.log("data", data);
+
+        if (data.status === "error") {
+          throw new Error(data.message);
         }
-      });
+
+        this.users = this.users.map((user) => {
+          if (user.id !== userId) {
+            return user;
+          } else {
+            return {
+              ...user,
+              followerCount: user.followerCount + 1,
+              isFollowed: true,
+            };
+          }
+        });
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法加入追蹤，請稍後再試",
+        });
+      }
     },
-    unfollow(userId) {
-      this.users = this.users.map((user) => {
-        if (userId !== user.id) {
-          return user;
-        } else {
-          return {
-            ...user,
-            followerCount: user.followerCount - 1,
-            isFollowed: false,
-          };
+    async deleteFollowing(userId) {
+      try {
+        const { data } = await usersAPI.deleteFollowing({ userId });
+
+        if (data.status === "error") {
+          throw new Error(data.message);
         }
-      });
+
+        this.users = this.users.map((user) => {
+          if (user.id !== userId) {
+            return user;
+          } else {
+            return {
+              ...user,
+              followerCount: user.followerCount - 1,
+              isFollowed: false,
+            };
+          }
+        });
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法取消追蹤，請稍後再試",
+        });
+      }
     },
   },
-};
-
-const dummyUserTop = {
-  users: [
-    {
-      id: 1,
-      name: "root",
-      email: "root@example.com",
-      password: "$2a$10$Rnp5uMYJ2ZLNES6HvRbQ7e8gfZRKUQ35luBAL5Sauj.QdLdBK6mf6",
-      isAdmin: true,
-      image: "https://picsum.photos/id/237/200/300",
-      createdAt: "2023-02-13T06:01:00.000Z",
-      updatedAt: "2023-02-13T06:01:00.000Z",
-      Followers: [],
-      FollowerCount: 0,
-      isFollowed: false,
-    },
-    {
-      id: 2,
-      name: "user1",
-      email: "user1@example.com",
-      password: "$2a$10$nKPEOtWgSi1bYjQE4QEw/eoVjss9P/62Mul9U2XEgRx9UCVPSBFHO",
-      isAdmin: false,
-      image: "https://picsum.photos/id/238/200/300",
-      createdAt: "2023-02-13T06:01:00.000Z",
-      updatedAt: "2023-02-13T06:01:00.000Z",
-      Followers: [],
-      FollowerCount: 0,
-      isFollowed: false,
-    },
-    {
-      id: 3,
-      name: "user2",
-      email: "user2@example.com",
-      password: "$2a$10$p1OFcLPNAJHszWk1bbisJ.aDlXcTOsRbTketo7lsH59g7.g7KALgu",
-      isAdmin: false,
-      image: "https://picsum.photos/id/239/200/300",
-      createdAt: "2023-02-13T06:01:00.000Z",
-      updatedAt: "2023-02-13T06:01:00.000Z",
-      Followers: [],
-      FollowerCount: 0,
-      isFollowed: false,
-    },
-  ],
 };
 </script>
