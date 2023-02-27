@@ -110,6 +110,18 @@ import { Toast } from "./../utils/helpers";
 
 export default {
   props: {
+    initialRestaurant: {
+      type: Object,
+      default: () => ({
+        name: '',
+        categoryId: '',
+        tel: '',
+        address: '',
+        description: '',
+        image: '',
+        openingHours: ''
+      })
+    },
     isProcessing: {
       type: Boolean,
       default: false,
@@ -118,17 +130,19 @@ export default {
   data() {
     return {
       restaurant: {
-        name: "",
-        categoryId: "",
-        tel: "",
-        address: "",
-        description: "",
-        image: "",
-        openingHours: "",
+        ...this.initialRestaurant,
       },
       categories: [],
       isLoading: true,
     };
+  },
+  watch: {
+    initialRestaurant(newValue) {
+      this.restaurant = {
+        ...this.restaurant,
+        ...newValue,
+      };
+    },
   },
   created() {
     this.fetchCategories();
