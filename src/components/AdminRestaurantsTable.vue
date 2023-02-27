@@ -81,7 +81,7 @@ export default {
       } catch (error) {
         Toast.fire({
           icon: "error",
-          title: "無法對餐廳取消讚，請稍後再試！",
+          title: "無法刪除餐廳，請稍後再試！",
         });
       }
     },
