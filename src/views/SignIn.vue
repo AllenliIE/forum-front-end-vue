@@ -90,6 +90,9 @@ export default {
         }
 
         localStorage.setItem("token", data.token);
+
+        //透過 setCurrentUser 把用者資料存到 vuex 的 state 中
+        this.$store.commit("setCurrentUser", data.user);
         this.$router.push("/restaurants");
       } catch (error) {
         this.isProcessing = false;
