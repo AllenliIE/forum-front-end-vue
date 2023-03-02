@@ -55,6 +55,8 @@
 </template>
 
 <script>
+import usersAPI from "../apis/users";
+import { Toast } from "../utils/helpers";
 import { emptyImageFilter } from "./../utils/mixins";
 export default {
   name: "UserProfileCard",
@@ -78,13 +80,47 @@ export default {
       isFollowed: this.initialIsFollowed,
     };
   },
+  watch: {
+    initialIsFollowed(newValue) {
+      this.isFollowed = {
+        ...this.isFollowed,
+        ...newValue,
+      };
+    },
+  },
   /* eslint-disable */
   methods: {
-    follow(userId) {
-      this.isFollowed = true;
+    async follow(userId) {
+      try {
+        const { data, status, statusText } = await usersAPI.following({
+          userId,
+        });
+        if (status === "error") {
+          throw new Error(statusText);
+        }
+        this.isFollowed = true;
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "",
+        });
+      }
     },
-    unfollow(userId) {
-      this.isFollowed = false;
+    async unfollow(userId) {
+      try {
+        const { data, status, statusText } = await usersAPI.unfollowing({
+          userId,
+        });
+        if (status === "error") {
+          throw new Error(statusText);
+        }
+        this.isFollowed = false;
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "",
+        });
+      }
     },
   },
 };
