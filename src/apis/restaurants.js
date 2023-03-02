@@ -23,4 +23,16 @@ export default {
   getDashboard({ restaurantId }) {
     return apiHelper.get(`/restaurants/${restaurantId}/dashboard`);
   },
+  addFavorite({ restaurantId }) {
+    return apiHelper.post(`/favorite/${restaurantId}`, null);
+  },
+  deleteFavorite({ restaurantId }) {
+    return apiHelper.delete(`/favorite/${restaurantId}`);
+  },
+  addLike({ restaurantId }) {
+    return apiHelper.post(`/like/${restaurantId}`, null);
+  },
+  deleteLike({ restaurantId }) {
+    return apiHelper.delete(`/like/${restaurantId}`);
+  },
 };
