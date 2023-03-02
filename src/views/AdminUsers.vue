@@ -38,7 +38,9 @@
 
 <script>
 import AdminNav from "../components/AdminNav.vue";
-
+import { mapState } from "vuex";
+import adminAPI from "./../apis/admin";
+import { Toast } from "./../utils/helpers";
 export default {
   name: "AdminUsers",
   components: {
@@ -47,72 +49,52 @@ export default {
   data() {
     return {
       users: [],
-      currentUser: dummyUser.currentUser,
     };
   },
-  methods: {
-    fetchUsers() {
-      this.users = dummyData.users;
-    },
-    toggleRole({ userId, isAdmin }) {
-      this.users = this.users.map((user) => {
-        if (userId === user.id) {
-          return {
-            ...user,
-            isAdmin: !isAdmin,
-          };
-        }
-        return user;
-      });
-    },
+  computed: {
+    ...mapState(["currentUser"]),
   },
   created() {
     this.fetchUsers();
   },
-};
-
-const dummyData = {
-  users: [
-    {
-      id: 1,
-      name: "root",
-      email: "root@example.com",
-      password: "$2a$10$oRTst038U9ITl2Csj2KMde0S5/WVSi.RxxCcjxnPyfzHZceo4QJ4W",
-      isAdmin: true,
-      image: null,
-      createdAt: "2022-08-01T03:06:33.000Z",
-      updatedAt: "2022-08-01T03:06:33.000Z",
+  methods: {
+    async fetchUsers() {
+      try {
+        const { data } = await adminAPI.adminUsers.get();
+        this.users = data.users;
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "",
+        });
+      }
     },
-    {
-      id: 2,
-      name: "user1",
-      email: "user1@example.com",
-      password: "$2a$10$Z0x.yF5BAKzPGwJjAymI9u0ogykem9wfv0uNJ58avWTlNseeFbPR6",
-      isAdmin: false,
-      image: null,
-      createdAt: "2022-08-01T03:06:34.000Z",
-      updatedAt: "2022-08-01T03:06:34.000Z",
+    async toggleRole({ userId, isAdmin }) {
+      try {
+        const { data } = await adminAPI.adminUsers.update({
+          userId,
+          isAdmin: (!isAdmin).toString(), // 原本是 Boolean，要轉成 string 伺服器才會接受
+        });
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.users = this.users.map((user) => {
+          if (user.id === userId) {
+            return {
+              ...user,
+              isAdmin: !isAdmin,
+            };
+          }
+          return user;
+        });
+        console.log(data);
+      } catch (error) {
+        Toast.fire({
+          icon: "error",
+          title: "無法更新會員角色，請稍後再試",
+        });
+      }
     },
-    {
-      id: 3,
-      name: "user2",
-      email: "user2@example.com",
-      password: "$2a$10$kxnI/c2D5FG1PZfWN4OH5O9eZOK6nm2A23r7wfIpddRK1LTW5ZVHy",
-      isAdmin: false,
-      image: null,
-      createdAt: "2022-08-01T03:06:34.000Z",
-      updatedAt: "2022-08-01T03:06:34.000Z",
-    },
-  ],
-};
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: "管理者",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
   },
-  isAuthenticated: true,
 };
 </script>
