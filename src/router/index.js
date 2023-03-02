@@ -7,6 +7,16 @@ import store from "./../store";
 
 Vue.use(VueRouter);
 
+const authorizeIsAdmin = (to, from, next) => {
+  const currentUser = store.state.currentUser;
+  if (currentUser && !currentUser.isAdmin) {
+    next("/404");
+    return;
+  }
+
+  next();
+};
+
 const routes = [
   {
     path: "/",
@@ -72,31 +82,37 @@ const routes = [
     path: "/admin/users",
     name: "admin-users",
     component: () => import("../views/AdminUsers.vue"),
+    beforeEnter: authorizeIsAdmin,
   },
   {
     path: "/admin/categories",
     name: "admin-categories",
     component: () => import("../views/AdminCategories.vue"),
+    beforeEnter: authorizeIsAdmin,
   },
   {
     path: "/admin/restaurants",
     name: "admin-restaurants",
     component: () => import("../views/AdminRestaurants.vue"),
+    beforeEnter: authorizeIsAdmin,
   },
   {
     path: "/admin/restaurants/new",
     name: "admin-restaurant-new",
     component: () => import("../views/AdminRestaurantNew.vue"),
+    beforeEnter: authorizeIsAdmin,
   },
   {
     path: "/admin/restaurants/:id/edit",
     name: "admin-restaurant-edit",
     component: () => import("../views/AdminRestaurantEdit.vue"),
+    beforeEnter: authorizeIsAdmin,
   },
   {
     path: "/admin/restaurants/:id",
     name: "admin-restaurant",
     component: () => import("../views/AdminRestaurant.vue"),
+    beforeEnter: authorizeIsAdmin,
   },
   {
     path: "*",
@@ -110,10 +126,34 @@ const router = new VueRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
-  // 使用 dispatch 呼叫 Vuex 內的 actions
-  store.dispatch("fetchCurrentUser");
+router.beforeEach(async (to, from, next) => {
+  // 從 localStorage 取出 token
+  const tokenInLocalStorage = localStorage.getItem("token");
+  // 取得 store 裡儲存的 token
+  const tokenInStore = store.state.token;
+
+  // 預設是尚未驗證
+  let isAuthenticated = store.state.isAuthenticated;
+
+  // 如果 localStorage 有 token 而且 localStorage 的 token 和 store 裡的不一樣再驗證
+  if (tokenInLocalStorage && tokenInLocalStorage !== tokenInStore) {
+    // 呼叫 actions 方法的關鍵字是 dispatch
+    isAuthenticated = await store.dispatch("fetchCurrentUser");
+  }
+
+  // 不需要驗證 token 的頁面
+  const pathsWithoutAuthentication = ["sign-in", "sign-up"];
+  // 如果 token 無效則轉址到登入頁
+  if (!isAuthenticated && !pathsWithoutAuthentication.includes(to.name)) {
+    next("/signin");
+    return;
+  }
+
+  // 如果 token 有效則轉址到餐廳首頁
+  if (isAuthenticated && pathsWithoutAuthentication.includes(to.name)) {
+    next("/restaurants");
+    return;
+  }
   next();
 });
-
 export default router;

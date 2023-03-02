@@ -14,6 +14,7 @@ export default new Vuex.Store({
       isAdmin: false,
     },
     isAuthenticated: false,
+    token: "",
   },
   getters: {},
   //用來修改 state 的方法，methods
@@ -24,7 +25,14 @@ export default new Vuex.Store({
         //透過 API 取得的 currentUser
         ...currentUser,
       };
+      state.token = localStorage.getItem("token");
       state.isAuthenticated = true;
+    },
+    revokeAuthentication(state) {
+      state.currentUser = {};
+      state.isAuthenticated = false;
+      state.token = "";
+      localStorage.removeItem("token");
     },
   },
   actions: {
@@ -41,8 +49,11 @@ export default new Vuex.Store({
           image,
           isAdmin,
         });
+        return true;
       } catch (error) {
         console.error(error.message);
+        commit("revokeAuthentication");
+        return false;
       }
     },
   },
