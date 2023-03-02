@@ -33,37 +33,42 @@
         />
       </div>
 
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button :disabled="isProcessing" type="submit" class="btn btn-primary">
+        {{ isProcessing ? "處理中..." : "Submit" }}
+      </button>
     </form>
   </div>
 </template>
 
 <script>
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: "管理者",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
-
+import usersAPI from "../apis/users";
+import { Toast } from "../utils/helpers";
+import { mapState } from "vuex";
 export default {
   name: "UserEdit",
   data() {
     return {
       user: {
-        id: null,
+        id: 0,
         name: "",
         image: "",
       },
+      isProcessing: false,
     };
+  },
+  computed: {
+    ...mapState(["currentUser"]),
+  },
+  watch: {
+    currentUser() {
+      if (!this.user.id) return;
+      const { id } = this.$route.params;
+      this.setUser(id);
+    },
   },
   methods: {
     fetchUser() {
-      this.user = dummyUser.currentUser;
+      this.user = this.currentUser;
     },
     handleFileChange(e) {
       const files = e.target.files;
@@ -71,13 +76,35 @@ export default {
       const imageURL = window.URL.createObjectURL(files[0]);
       this.user.image = imageURL;
     },
-    handleSubmit(e) {
-      const form = e.target;
-      const formData = new FormData(form);
+    async handleSubmit(e) {
+      try {
+        const text = this.user.name.trim();
+        if (!text) {
+          Toast.fire({
+            icon: "warning",
+            title: "請填寫名稱",
+          });
+          return;
+        }
+        const form = e.target;
+        const formData = new FormData(form);
 
-      // TODO: 透過 API 向伺服器更新使用者
-      for (let [name, value] of formData.entries()) {
-        console.log(name + ": " + value);
+        this.isProcessing = true;
+
+        const data = await usersAPI.update({
+          userId: this.user.id,
+          formData,
+        });
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.$router.push({ name: "user", params: { id: this.user.id } });
+      } catch (error) {
+        this.isProcessing = false;
+        Toast.fire({
+          icon: "error",
+          title: "",
+        });
       }
     },
   },
